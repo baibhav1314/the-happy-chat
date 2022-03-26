@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Avatar } from "@mui/material";
 import "./SidebarChat.css";
+import { Avatar, IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 
 function SidebarChat({ id, name, addNewChat }) {
+    const [seed, setSeed] = useState("");
+
+    useEffect(() => {
+        setSeed(Math.floor(Math.random() * 1000));
+    }, []);
+
     const createChat = () => {
         console.log("hiii");
     };
@@ -11,7 +17,9 @@ function SidebarChat({ id, name, addNewChat }) {
     return !addNewChat ? (
         <Link to={`/`}>
             <div className="sidebarChat">
-                <Avatar src={`https://avatars.dicebear.com/api/human/01.svg`} />
+                <Avatar
+                    src={`https://avatars.dicebear.com/api/human/${seed}.svg`}
+                />
                 <div className="sidebarChat_info">
                     <h2>{name}</h2>
                     <p>mkmcxkzmc</p>
