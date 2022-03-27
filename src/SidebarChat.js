@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./SidebarChat.css";
-import { Avatar, IconButton } from "@mui/material";
+import { Avatar } from "@mui/material";
 import { Link } from "react-router-dom";
+import db from "./firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 function SidebarChat({ id, name, addNewChat }) {
     const [seed, setSeed] = useState("");
@@ -11,11 +13,17 @@ function SidebarChat({ id, name, addNewChat }) {
     }, []);
 
     const createChat = () => {
-        console.log("hiii");
+        const roomName = prompt("Please Enter Name for Chat");
+
+        if (roomName) {
+            addDoc(collection(db, "rooms"), {
+                name: roomName,
+            });
+        }
     };
 
     return !addNewChat ? (
-        <Link to={`/`}>
+        <Link to={`/rooms/${id}`} key={id}>
             <div className="sidebarChat">
                 <Avatar
                     src={`https://avatars.dicebear.com/api/human/${seed}.svg`}

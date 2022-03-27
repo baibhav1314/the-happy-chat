@@ -8,10 +8,23 @@ import {
     Mic,
     InsertEmoticon,
 } from "@mui/icons-material";
+import { useParams } from "react-router-dom";
+import { doc, onSnapshot } from "firebase/firestore";
+import db from "./firebase";
 
 function Chat() {
     const [input, setInput] = useState("");
     const [seed, setSeed] = useState("");
+    const { roomId } = useParams();
+    const [roomName, setRoomName] = useState("");
+
+    useEffect(() => {
+        if (roomId) {
+            onSnapshot(doc(db, "rooms", roomId), (snapshot) => {
+                setRoomName(snapshot.data().name);
+            });
+        }
+    }, [roomId]);
 
     useEffect(() => {
         setSeed(Math.floor(Math.random() * 1000));
@@ -30,7 +43,7 @@ function Chat() {
                     src={`https://avatars.dicebear.com/api/human/${seed}.svg`}
                 />
                 <div className="chat_headerInfo">
-                    <h3 className="chat-room-name">bhh</h3>
+                    <h3 className="chat-room-name">{roomName}</h3>
                     <p className="chat-room-last-seen">Last seen </p>
                 </div>
                 <div className="chat_headerRight">

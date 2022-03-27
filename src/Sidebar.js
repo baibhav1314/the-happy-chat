@@ -8,7 +8,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import SidebarChat from "./SidebarChat";
 import { collection, onSnapshot } from "firebase/firestore";
 import db from "./firebase";
-function Sidebar(props) {
+function Sidebar() {
     const [rooms, setRooms] = useState([]);
 
     useEffect(() => {
@@ -20,6 +20,10 @@ function Sidebar(props) {
                 }))
             );
         });
+
+        return () => {
+            unsub();
+        };
     }, []);
     return (
         <div className="sidebar">
@@ -27,13 +31,13 @@ function Sidebar(props) {
                 <Avatar />
                 <div className="sidebar_headerRight">
                     <IconButton>
-                        <DonutLargeIcon />
+                        <DonutLargeIcon sx={{ color: "white" }} />
                     </IconButton>
                     <IconButton>
-                        <ChatIcon />
+                        <ChatIcon sx={{ color: "white" }} />
                     </IconButton>
                     <IconButton>
-                        <MoreVertIcon />
+                        <MoreVertIcon sx={{ color: "white" }} />
                     </IconButton>
                 </div>
             </div>
