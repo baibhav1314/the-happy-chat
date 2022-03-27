@@ -9,30 +9,53 @@ import {
     InsertEmoticon,
 } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+} from "firebase/firestore";
 import db from "./firebase";
+import { useStateValue } from "./StateProvider";
 
 function Chat() {
     const [input, setInput] = useState("");
     const [seed, setSeed] = useState("");
     const { roomId } = useParams();
     const [roomName, setRoomName] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [{ user }, dispatch] = useStateValue();
 
     useEffect(() => {
         if (roomId) {
             onSnapshot(doc(db, "rooms", roomId), (snapshot) => {
                 setRoomName(snapshot.data().name);
             });
+            const q = query(
+                collection(doc(db, "rooms", roomId), "messages"),
+                orderBy("timestamp", "asc")
+            );
+            onSnapshot(q, (snapshot) => {
+                setMessages(snapshot.docs.map((doc) => doc.data()));
+            });
         }
     }, [roomId]);
 
     useEffect(() => {
         setSeed(Math.floor(Math.random() * 1000));
-    }, []);
+    }, [roomId]);
 
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log("chat");
+        const q = query(collection(doc(db, "rooms", roomId), "messages"));
+        addDoc(q, {
+            message: input,
+            name: user.displayName,
+            timestamp: serverTimestamp(),
+        });
         setInput("");
     };
 
@@ -44,7 +67,12 @@ function Chat() {
                 />
                 <div className="chat_headerInfo">
                     <h3 className="chat-room-name">{roomName}</h3>
-                    <p className="chat-room-last-seen">Last seen </p>
+                    <p className="chat-room-last-seen">
+                        Last seen{" "}
+                        {new Date(
+                            messages[messages.length - 1]?.timestamp?.toDate()
+                        ).toLocaleString()}
+                    </p>
                 </div>
                 <div className="chat_headerRight">
                     <IconButton>
@@ -59,20 +87,21 @@ function Chat() {
                 </div>
             </div>
             <div className="chat_body">
-                <p className={`chat_message chat_receiver`}>
-                    <span className="chat_name">jncka</span>
-                    ndjdsnckjs
-                    <span className="chat_timestemp">
-                        {new Date().toLocaleString()}
-                    </span>
-                </p>
-                <p className={`chat_message `}>
-                    <span className="chat_name">jncka</span>
-                    snckjs
-                    <span className="chat_timestemp">
-                        {new Date().toLocaleString()}
-                    </span>
-                </p>
+                {messages.map((message) => (
+                    <p
+                        className={`chat_message ${
+                            message.name === user.displayName && `chat_receiver`
+                        }`}
+                    >
+                        <span className="chat_name">{message.name}</span>
+                        {message.message}
+                        <span className="chat_timestemp">
+                            {new Date(
+                                message.timestamp?.toDate()
+                            ).toLocaleString()}
+                        </span>
+                    </p>
+                ))}
             </div>
             <div className="chat_footer">
                 <InsertEmoticon />
@@ -84,7 +113,6 @@ function Chat() {
                         placeholder="Type a message"
                     />
                     <button type="submit" onClick={sendMessage}>
-                        {" "}
                         Send a Message
                     </button>
                 </form>
